@@ -60,7 +60,7 @@ describe('searchYouTube', function() {
   });
 
   it('should accept `key`, `query`, and `max` options and send them in GET request', function() {
-    searchYouTube({ key: 'API_KEY', query: 'cats', max: 10 }, () => {});
+    searchYouTube({ key: 'API_KEY', q: 'cats', maxResults: 10 }, () => {});
 
     var params = getURLSearchParams(requests[0].url);
     expect(params.key).to.equal('API_KEY');
@@ -73,15 +73,19 @@ describe('searchYouTube', function() {
   it('should GET videos with the same shape as `exampleVideoData`', function(done) {
     var options = {
       key: YOUTUBE_API_KEY,
-      query: 'react',
-      max: 5
+      q: 'react',
+      part: 'snippet',
+      maxResults: 5,
+      videoEmbeddable: true,
+      type: 'video'
     };
 
     // We want this test to make a real AJAX request
     xhr.restore();
 
     searchYouTube(options, (data) => {
-      expect(hasSameShape(data, exampleVideoData)).to.be.true;
+      console.log(data.items);
+      expect(hasSameShape(data.items, exampleVideoData)).to.be.true;
       done();
     });
   });
