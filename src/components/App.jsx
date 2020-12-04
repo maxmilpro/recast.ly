@@ -1,14 +1,20 @@
 import VideoList from './VideoList.js';
 import VideoPlayer from './VideoPlayer.js';
 import Search from './Search.js';
-import exampleVideoData from '/src/data/exampleVideoData.js';
+import searchYouTube from '/src/lib/searchYouTube.js';
+import YOUTUBE_API_KEY from '/src/config/youtube.js';
 
 class App extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
-      videoList: exampleVideoData,
-      currentVideo: exampleVideoData[0]
+      videoList: [
+        {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}},
+        {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}},
+        {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}},
+        {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}},
+        {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}}],
+      currentVideo: {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}}
     };
   }
 
@@ -21,6 +27,23 @@ class App extends React.Component {
         break;
       }
     }
+  }
+
+  componentDidMount () {
+    var options = {
+      key: YOUTUBE_API_KEY,
+      q: 'react tutorial',
+      part: 'snippet',
+      maxResults: 5,
+      videoEmbeddable: true,
+      type: 'video'
+    };
+
+    var callback = (data) => {
+      var videos = data.items === undefined ? data : data.items;
+      this.setState({videoList: videos, currentVideo: videos[0]});
+    };
+    this.props.searchYouTube(options, callback);
   }
 
   render () {
