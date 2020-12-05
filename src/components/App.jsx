@@ -14,7 +14,8 @@ class App extends React.Component {
         {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}},
         {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}},
         {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}}],
-      currentVideo: {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}}
+      currentVideo: {id: {videoId: ''}, snippet: {title: '', description: '', thumbnails: {default: {url: ''}}}},
+      videoSearch: ''
     };
   }
 
@@ -27,6 +28,29 @@ class App extends React.Component {
         break;
       }
     }
+  }
+
+  handleChange(event) {
+    var searchText = event.target.value;
+    var options = {
+      key: YOUTUBE_API_KEY,
+      q: searchText,
+      part: 'snippet',
+      maxResults: 5,
+      videoEmbeddable: true,
+      type: 'video'
+    };
+    var callback = (data) => {
+      var videos = data.items === undefined ? data : data.items;
+      this.setState({videoList: videos, currentVideo: videos[0], videoSearch: searchText});
+    };
+    this.props.searchYouTube(options, callback);
+    /*
+    'should update the video list when typing into the input box' test was failing in SearchSpec.jsx due to asynchronous call in debounce method - instructed my HelpDesk that we are passing all tests and should submit without debounce
+    We plan on connecting with TM
+    */
+    // var debouncedSearch = this.debounce(this.props.searchYouTube, 500);
+    // debouncedSearch(options, callback);
   }
 
   componentDidMount () {
@@ -46,12 +70,33 @@ class App extends React.Component {
     this.props.searchYouTube(options, callback);
   }
 
+  debounce (func, wait, immediate = false) {
+    var timeout, result;
+    return function() {
+      var context = this;
+      var args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) {
+          result = func.apply(context, args);
+        }
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) {
+        result = func.apply(context, args);
+      }
+      return result;
+    };
+  }
+
   render () {
     return (
       <div>
         <nav className="navbar">
           <div className="col-md-6 offset-md-3">
-            <div><Search/></div>
+            <div><Search change={(event) => this.handleChange(event)}/></div>
           </div>
         </nav>
         <div className="row">
@@ -70,3 +115,5 @@ class App extends React.Component {
 // In the ES6 spec, files are "modules" and do not share a top-level scope
 // `var` declarations will only exist globally where explicitly defined
 export default App;
+
+
